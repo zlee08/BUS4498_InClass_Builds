@@ -18,6 +18,13 @@ Keep the **exact** task ID and task name from `workflow-of-tasks.md` inside the 
 task_id: "[Existing task ID]"
 task_name: "[Exact task name from the workflow]"
 task_owner: "[Person or team accountable for this task]"
+
+# Agent Inference Configuration
+Provider: [e.g., Groq, OpenAI, Claude, Google Gemini]
+Model: "[Exact supported API model ID.]"
+Role: [permitted subtasks the model supports]
+Maximum inference requests per task run: "[Whole-number limit.]"
+On inference failure or exhausted limits: Record the unresolved status and hand the case to [human role].
 ```
 
 ## 1. Task Goal
@@ -73,3 +80,24 @@ Stop at the first applicable budget limit or handoff condition. While awaiting r
 - **Unresolved issues:**  Remaining uncertainties or questions. Write none only when the task has been completed successfully.
 - **Handoff note:** Reason for stopping, unresolved questions, and what the reviewer needs to decide; write “Not applicable” for a completed task.
 - **Next task or recipient:** Who receives the completed output? Unresolved cases go to the handoff recipient above.
+
+
+*Name each planned tool and specify its permitted use. Use verb-object names, such as **`retrieve_records`**, usually matching the task or permitted subtask it supports. Tool name identifies the capability; tool type identifies the proposed implementation. No scripts or working integrations are required.*
+
+### Task-Wide Limits
+
+- **Total task timeout:** [Maximum elapsed time for one task run, with units; include tool calls, retries, and waiting.]
+- **Maximum tool calls:** [Maximum total calls across all tools during one task run; retries count toward this total.]
+
+### Tool 1
+
+- **Tool name:** [Proposed verb-object name.]
+- **Input:** [replace with a input name listed above]
+- **Output:** [replace with a output name listed above]
+- **Implementation Route:** [file operations, functions/scripts, database queries, and web API calls]
+- **Integration approach:** [direct integration, or MCP integration]
+- **Role in this task:** [Support which permitted subtask(s)]
+- **Task timeout:** [Maximum total elapsed time for one task run, with units. For L0, state a human response deadline instead, such as one business day after assignment.]
+- **Maximum retries:** [Nonnegative whole number of additional attempts. Use 0 if retries are not permitted. For L0, write "Not applicable — manual task."]
+- **Retry only when:** [Conditions that permit another attempt and any waiting interval. For work that changes records or sends messages, explain how retries avoid duplicates; hand off if the action's outcome is uncertain. Write "Not applicable" for manual tasks or when retries are 0.]
+- **On timeout, exhausted retries, or an error that cannot be retried:** [State the status or evidence recorded and the exception task or person receiving the case. Do not continue as if the task succeeded.]
