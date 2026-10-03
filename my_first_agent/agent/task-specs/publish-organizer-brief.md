@@ -1,42 +1,33 @@
 # Publish organizer brief Task Specification
 
-Create one copy of this template for each Level 3 task identified in class (For this in-class build practice, having one Level 3 task is sufficient).
-
-Save each copy in `my_first_agent/agent/task-specs/`. Rename the file using the task name in lowercase, with hyphens between words. Replace `&` with `and` and remove other punctuation.
-
-Examples:
-
-- `Grade Item Condition` becomes `grade-item-condition.md`
-- `Customer Dispute & Compensation Assessment` becomes `customer-dispute-and-compensation-assessment.md`
-
-Keep the **exact** task ID and task name from `workflow-of-tasks.md` inside the file. Replace all bracketed prompts. Leave Section 3 empty; tool permissions and boundaries will be added next week. 
-
-*Remove this sentence and the instructions above before your submission.*
-
 ```yaml
 # BASIC INFORMATION
 task_id: "T6"
 task_name: "Publish organizer brief"
-task_owner: "CPVC event organizer (Sam Otto)"
+task_owner: "CPVC event organizer"
+
 # Agent Inference Configuration
 Provider: OpenAI
 Model: "gpt-5.1"
 Role: "Synthesize the latest planning outputs into an organizer-ready brief, identify missing or conflicting evidence, and route unresolved decisions for human review."
 Maximum inference requests per task run: "8"
 On inference failure or exhausted limits: "Record the unresolved status and hand the case to the CPVC event organizer."
+
+# Assumption Review Bounds
+Maximum assumption-review rounds per planning run: "2 completed H1 review rounds"
+Assumption-review deadline: "Within 1 business day during the registration period, or before the next scheduled planning run; on event day, before resource commitments or the approved reminder window."
 ```
 
 ## 1. Task Goal
 
 - **Objective:** Produce a concise, actionable organizer brief that combines the latest attendance forecast, uncertainty range, assumptions, confidence level, resource plan, and required human decisions so CPVC organizers can approve or revise the recommendation before the planning run closes.
 
-
 ## 2. Inbound Inputs
 
 ### Input 1
 
 - **Input name:** Validated planning dataset
-- **What it contains:**  A dated planning snapshot containing current registration, cancellation, confirmation, event-detail, data-quality, and privacy-validation results.
+- **What it contains:** A dated planning snapshot containing current registration, cancellation, confirmation, event-detail, data-quality, and privacy-validation results.
 - **Source:** T2: Validate data and privacy
 
 ### Input 2
@@ -96,7 +87,6 @@ The agent may choose, repeat, skip, or combine the permitted subtasks based on t
 - **Subtask description:** Determine whether the completed brief can be published or must be routed to the organizer for review. Record the publication or handoff status and the destination.
 - **Subtask boundary:** May publish only when required inputs are present, the brief is internally consistent, and no unresolved human decision blocks publication. If confidence is insufficient or the delivery result is uncertain, route the brief for organizer review and take no further autonomous action.
 - **Retry limits:** Attempt at most 1 additional publication attempt, and only when the first attempt is confirmed not to have created a duplicate.
-**
 
 - **Decision guidance:** After each subtask, use its findings to select the permitted subtask most likely to resolve the most important remaining uncertainty. If no permitted subtask can make useful progress, stop and hand the case to the CPVC event organizer.
 
@@ -104,7 +94,10 @@ The agent may choose, repeat, skip, or combine the permitted subtasks based on t
 
 - **Stop successfully when:** The brief contains the current forecast, uncertainty range, confidence level, assumptions, resource recommendation, reminder status, and required decisions, passes internal consistency checks, and is either published with a delivery record or formally routed for organizer review.
 - **Hand off early when:** A required input is missing, stale, contradictory, below the configured confidence threshold, or unavailable after the retry limit; when an organizer decision is required; or when publication status is uncertain.
-- **Hand off to:** CPVC event organizer (Sam Otto)
+- **Hand off to:** CPVC event organizer
+- **Assumption-review loop limit:** Allow at most 2 completed H1 review rounds in one planning run. A round consists of returning to T3 after corrected assumptions, reevaluating D1, and receiving the next H1 decision when confidence remains insufficient.
+- **Assumption-review deadline:** The organizer must respond within 1 business day during the registration period or before the next scheduled planning run, whichever comes first. On event day, the response is due before resource commitments or the approved reminder window.
+- **Unresolved-loop outcome:** If the deadline expires or the second H1 review round still does not produce sufficient confidence, stop the loop, do not publish the brief as an approved recommendation, and route the current brief to the CPVC event organizer with status `unresolved` and the next decision required.
 
 Stop at the first applicable budget limit or handoff condition. While awaiting review, take no further autonomous action.
 
@@ -118,11 +111,11 @@ Stop at the first applicable budget limit or handoff condition. While awaiting r
 - **Handoff note:** State the missing evidence, unresolved conflict, or human decision required and identify the specific section of the brief affected; write “Not applicable” when the brief is published successfully.
 - **Next task or recipient:** CPVC event organizer receives the published brief or the review handoff.
 
-
 ### Task-Wide Limits
 
 - **Total task timeout:** 10 minutes per task run, including inference, tool calls, retries, and waiting.
 - **Maximum tool calls:** 12 total calls across all tools during one task run.
+- **Assumption-review loop limit:** 2 H1 review rounds maximum per planning run; the loop is also bounded by the assumption-review deadline above.
 
 ### Tool 1
 
