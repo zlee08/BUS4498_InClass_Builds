@@ -1,4 +1,4 @@
-project_id = "event-radar"
-
-[functions.process-event]
+# Settings the Supabase tools read when they deploy this project's functions.
+# The website calls the AI agent with the publishable key, which isn't a JWT, so JWT verification is off.
+[functions.submit-event]
 verify_jwt = false

@@ -1,141 +1,72 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Club Event Radar: discover approved campus events." />
-    <title>Club Event Radar</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header class="site-header">
-      <a class="brand" href="#top" aria-label="Club Event Radar home">
-        <span class="brand-mark">✦</span>
-        <span>Club Event Radar</span>
-      </a>
-      <nav class="nav-actions" aria-label="Site actions">
-        <a class="text-link" href="#submit">Submit an event</a>
-        <button class="button button-small button-ghost" id="moderator-toggle" type="button">Moderator sign in</button>
-      </nav>
-    </header>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Club Event Radar</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="kicker">Campus clubs · practice website</p>
+    <h1>Club Event Radar</h1>
+    <p class="lede">Paste a club announcement. An AI agent turns it into an event card, checks the posting rules, and catches duplicates.</p>
+    <ul class="badges">
+      <li>🤖 Cards drafted by an AI agent</li>
+      <li>✅ Checked against posting rules</li>
+      <li>🧑‍⚖️ Unclear posts go to a moderator</li>
+    </ul>
+  </div>
+</header>
 
-    <main id="top">
-      <section class="hero page-width">
-        <div class="hero-copy">
-          <p class="eyebrow">Cal Poly club life, in one place</p>
-          <h1>Find your next<br /><span>good plan.</span></h1>
-          <p class="hero-text">A friendly radar for student events, workshops, meetups, and campus gatherings. Browse approved posts or send one in for review.</p>
-          <a class="button button-primary" href="#events">Explore events <span aria-hidden="true">↓</span></a>
-        </div>
-        <div class="hero-art" aria-hidden="true">
-          <div class="orbit orbit-one"></div>
-          <div class="orbit orbit-two"></div>
-          <div class="spark spark-one">✦</div>
-          <div class="spark spark-two">✦</div>
-          <div class="art-card art-card-back"></div>
-          <div class="art-card art-card-front">
-            <span class="art-date">FRI · 7:00 PM</span>
-            <strong>Design<br />and chill</strong>
-            <span class="art-location">The Hub · San Luis Obispo</span>
-          </div>
-        </div>
-      </section>
+<main class="wrap layout">
+  <section class="card post" aria-labelledby="postTitle">
+    <h2 id="postTitle">Post an event</h2>
+    <form id="postForm">
+      <label for="announcement">Announcement <span class="hint">Paste the Instagram caption, group-chat message, or flyer text.</span></label>
+      <textarea id="announcement" name="announcement" rows="6" maxlength="2000" required placeholder="Board Game Guild: Game Night! Thursday, 7 to 10 pm in the University Union, Room 220. Free pizza!"></textarea>
+      <label for="flyer">Flyer photo <span class="hint">Optional. JPG or PNG, up to 5 MB. Posts with a photo wait for a moderator.</span></label>
+      <input id="flyer" name="flyer" type="file" accept="image/jpeg,image/png">
+      <button type="submit" id="postBtn">Post it</button>
+    </form>
+    <div id="postResult" class="result" role="status" aria-live="polite" hidden></div>
+  </section>
 
-      <section class="toolbar page-width" id="events" aria-labelledby="events-heading">
-        <div>
-          <p class="eyebrow">What’s happening</p>
-          <h2 id="events-heading">Upcoming events</h2>
-        </div>
-        <div class="filters" role="group" aria-label="Event filters">
-          <label class="search-wrap">
-            <span class="sr-only">Search events</span>
-            <input id="search" type="search" placeholder="Search events" autocomplete="off" />
-            <span aria-hidden="true">⌕</span>
-          </label>
-          <select id="category-filter" aria-label="Filter by category">
-            <option value="all">All categories</option>
-            <option value="workshop">Workshops</option>
-            <option value="social">Social</option>
-            <option value="career">Career</option>
-            <option value="arts">Arts & culture</option>
-            <option value="sports">Sports</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-      </section>
+  <section class="board-section" aria-labelledby="boardTitle">
+    <div class="board-head">
+      <h2 id="boardTitle">Coming up</h2>
+      <button type="button" class="ghost" id="refreshBtn">Refresh</button>
+    </div>
+    <p id="boardStatus" class="muted" role="status"></p>
+    <ul id="board" class="board"></ul>
 
-      <section class="page-width" aria-live="polite" aria-busy="false">
-        <div id="status" class="status-message" role="status"></div>
-        <div id="event-grid" class="event-grid"></div>
-      </section>
-
-      <section class="submit-section page-width" id="submit" aria-labelledby="submit-heading">
-        <div class="submit-card">
-          <div>
-            <p class="eyebrow">Know something we should radar?</p>
-            <h2 id="submit-heading">Send in an event.</h2>
-            <p>Share the basics. The event agent will turn your post into a clean event card for moderator review.</p>
-          </div>
-          <form id="submit-form" class="event-form">
-            <label>Event title <input name="title" required maxlength="120" placeholder="e.g. Product design workshop" /></label>
-            <label>Description <textarea name="description" required maxlength="2000" rows="4" placeholder="What should students know?"></textarea></label>
-            <div class="form-row">
-              <label>Date <input name="event_date" type="date" required /></label>
-              <label>Start time <input name="start_time" type="time" /></label>
-            </div>
-            <div class="form-row">
-              <label>Location <input name="location" required maxlength="160" placeholder="Building and room" /></label>
-              <label>Category
-                <select name="category">
-                  <option value="workshop">Workshop</option>
-                  <option value="social">Social</option>
-                  <option value="career">Career</option>
-                  <option value="arts">Arts & culture</option>
-                  <option value="sports">Sports</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-            </div>
-            <button class="button button-primary" type="submit">Send for review <span aria-hidden="true">→</span></button>
-            <p id="submit-status" class="form-status" role="status"></p>
-          </form>
-        </div>
-      </section>
-    </main>
-
-    <dialog id="moderator-dialog" class="moderator-dialog">
-      <button class="dialog-close" id="dialog-close" type="button" aria-label="Close moderator panel">×</button>
-      <div id="auth-view">
-        <p class="eyebrow">Private workspace</p>
-        <h2>Moderator sign in</h2>
-        <p class="muted">Only invited moderator accounts can review, publish, or reject submissions.</p>
-        <form id="sign-in-form" class="event-form">
-          <label>Email <input name="email" type="email" required autocomplete="email" /></label>
-          <label>Password <input name="password" type="password" required autocomplete="current-password" /></label>
-          <button class="button button-primary" type="submit">Sign in</button>
-          <p id="auth-status" class="form-status" role="status"></p>
-        </form>
+    <details class="card mod" id="modBox">
+      <summary>Moderator sign-in</summary>
+      <form id="signInForm">
+        <label for="modEmail">Email</label>
+        <input id="modEmail" type="email" autocomplete="username" required>
+        <label for="modPassword">Password</label>
+        <input id="modPassword" type="password" autocomplete="current-password" required>
+        <button type="submit" id="signInBtn">Sign in</button>
+        <p id="signInMsg" class="muted" role="status"></p>
+      </form>
+      <div id="modArea" hidden>
+        <p>Signed in as <b id="modWho"></b>. <button type="button" class="ghost" id="signOutBtn">Sign out</button></p>
+        <h3>Waiting for review</h3>
+        <p id="waitingStatus" class="muted" role="status"></p>
+        <ul id="waitingList" class="board"></ul>
       </div>
-      <div id="dashboard-view" hidden>
-        <div class="dashboard-heading">
-          <div>
-            <p class="eyebrow">Moderator workspace</p>
-            <h2>Review submissions</h2>
-          </div>
-          <button class="button button-small button-ghost" id="sign-out" type="button">Sign out</button>
-        </div>
-        <div id="moderator-events" class="moderator-events"></div>
-      </div>
-    </dialog>
+    </details>
+  </section>
+</main>
 
-    <footer class="site-footer page-width">
-      <span>Club Event Radar</span>
-      <span>Built for BUS 4498</span>
-    </footer>
+<footer class="wrap foot">
+  <p>A practice website for BUS 4498. The clubs and events are made up. <span id="aiNote"></span></p>
+</footer>
 
-    <script type="module" src="app.js"></script>
-  </body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
 </html>
