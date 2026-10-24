@@ -1,0 +1,4 @@
+project_id = "event-radar"
+
+[functions.process-event]
+verify_jwt = false
