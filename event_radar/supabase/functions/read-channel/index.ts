@@ -27,7 +27,25 @@ Deno.serve(async (request) => {
   const groupId = Deno.env.get("GROUPME_GROUP_ID");
   const botId = Deno.env.get("GROUPME_BOT_ID");
   if (request.method === "GET") {
-    return reply(200, { ok: true, ready: Boolean(token && groupId), bot: Boolean(botId), message: token && groupId ? "The GroupMe reader is configured." : "Add GROUPME_TOKEN and GROUPME_GROUP_ID in Supabase Secrets." });
+    const db = createClient(Deno.env.get("SUPABASE_URL")!, serverKey(), { auth: { persistSession: false } });
+    const { data: last } = await db.from("channel_messages").select("message_id,processed_at").eq("source", "groupme").not("processed_at", "is", null).order("processed_at", { ascending: false }).limit(1).maybeSingle();
+    const { count } = await db.from("channel_messages").select("id", { count: "exact", head: true }).eq("source", "groupme").not("processed_at", "is", null);
+    const url = new URL(request.url);
+    if (url.searchParams.get("check") === "groupme" && token && groupId) {
+      const checkResponse = await fetch(`https://api.groupme.com/v3/groups/${encodeURIComponent(groupId)}/messages?limit=1`, { headers: { "X-Access-Token": token, "Accept": "application/json" } });
+      const checkData = await checkResponse.json().catch(() => ({}));
+      const tokenWorks = checkResponse.status !== 401 && checkResponse.status !== 403;
+      return reply(200, {
+        ok: true,
+        ready: true,
+        bot: Boolean(botId),
+        groupme: { token_works: tokenWorks, group_found: checkResponse.ok, message: checkResponse.ok ? "GroupMe can read this group." : String(checkData?.meta?.errors?.[0] || "GroupMe could not read this group.") },
+        last_message_id: last?.message_id || "",
+        read_count: count || 0,
+        last_run: last?.processed_at || "",
+      });
+    }
+    return reply(200, { ok: true, ready: Boolean(token && groupId), bot: Boolean(botId), last_message_id: last?.message_id || "", read_count: count || 0, last_run: last?.processed_at || "", message: token && groupId ? "The GroupMe reader is configured." : "Add GROUPME_TOKEN and GROUPME_GROUP_ID in Supabase Secrets." });
   }
   if (request.method !== "POST") return reply(405, { ok: false, message: "Use POST to read the channel." });
   if (!token || !groupId) return reply(503, { ok: false, message: "The GroupMe reader is missing its Supabase Secrets." });
