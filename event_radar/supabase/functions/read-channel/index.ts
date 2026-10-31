@@ -33,7 +33,9 @@ Deno.serve(async (request) => {
   try {
     let limit = 20;
     try { limit = Math.min(100, Math.max(1, Number((await request.json()).limit || 20))); } catch (_) { /* default */ }
-    const groupResponse = await fetch(`https://api.groupme.com/v3/groups/${encodeURIComponent(groupId)}/messages?token=${encodeURIComponent(token)}&limit=${limit}`);
+    const groupResponse = await fetch(`https://api.groupme.com/v3/groups/${encodeURIComponent(groupId)}/messages?limit=${limit}`, {
+      headers: { "X-Access-Token": token, "Accept": "application/json" },
+    });
     const groupData = await groupResponse.json();
     if (!groupResponse.ok) return reply(502, { ok: false, message: "GroupMe did not return the channel messages." });
 
