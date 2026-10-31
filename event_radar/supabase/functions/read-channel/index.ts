@@ -22,10 +22,12 @@ function reply(status: number, body: Record<string, unknown>) {
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: CORS });
-  const token = Deno.env.get("GROUPME_ACCESS_TOKEN");
+  // Match the Week 10 builder's secret names. Keep the older alias working too.
+  const token = Deno.env.get("GROUPME_TOKEN") || Deno.env.get("GROUPME_ACCESS_TOKEN");
   const groupId = Deno.env.get("GROUPME_GROUP_ID");
+  const botId = Deno.env.get("GROUPME_BOT_ID");
   if (request.method === "GET") {
-    return reply(200, { ok: true, ready: Boolean(token && groupId), message: token && groupId ? "The GroupMe reader is configured." : "Add GROUPME_ACCESS_TOKEN and GROUPME_GROUP_ID in Supabase Secrets." });
+    return reply(200, { ok: true, ready: Boolean(token && groupId), bot: Boolean(botId), message: token && groupId ? "The GroupMe reader is configured." : "Add GROUPME_TOKEN and GROUPME_GROUP_ID in Supabase Secrets." });
   }
   if (request.method !== "POST") return reply(405, { ok: false, message: "Use POST to read the channel." });
   if (!token || !groupId) return reply(503, { ok: false, message: "The GroupMe reader is missing its Supabase Secrets." });

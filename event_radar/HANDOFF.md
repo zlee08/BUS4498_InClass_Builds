@@ -37,8 +37,9 @@
 - `OPENAI_API_KEY`
 - `SUPABASE_SECRET_KEY`
 - `HOLD_ALL_POSTS`
-- `GROUPME_ACCESS_TOKEN`
+- `GROUPME_TOKEN`
 - `GROUPME_GROUP_ID`
+- optionally `GROUPME_BOT_ID`
 
 Set these in Supabase → Edge Functions → Secrets. Do not paste any secret values into this repo or chat. The public site should only use the project URL and the publishable key.
 
