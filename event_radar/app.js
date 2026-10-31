@@ -150,6 +150,7 @@
     if (session) {
       $("modWho").textContent = session.user.email;
       loadWaiting();
+      loadLessons();
     }
   }
   function review(ev, status) {
@@ -187,6 +188,42 @@
         $("waitingStatus").textContent = res.data.length ? res.data.length + " waiting" : "Nothing is waiting. Nice work.";
       });
   }
+  function loadLessons() {
+    $("lessonMsg").textContent = "Loading lessons…";
+    db.from("agent_lessons").select("id, lesson, active, created_at").order("created_at", { ascending: false })
+      .then(function (res) {
+        var list = $("lessonList");
+        list.textContent = "";
+        if (res.error) { $("lessonMsg").textContent = "Couldn't load lessons: " + res.error.message; return; }
+        res.data.forEach(function (lesson) {
+          var row = el("li", lesson.active ? "lesson active" : "lesson");
+          row.appendChild(el("span", null, lesson.lesson));
+          var toggle = el("button", "ghost", lesson.active ? "Turn off" : "Turn on");
+          toggle.type = "button";
+          toggle.addEventListener("click", function () {
+            db.from("agent_lessons").update({ active: !lesson.active }).eq("id", lesson.id)
+              .then(function (update) {
+                if (update.error) $("lessonMsg").textContent = "Couldn't update that lesson: " + update.error.message;
+                else loadLessons();
+              });
+          });
+          row.appendChild(toggle);
+          list.appendChild(row);
+        });
+        $("lessonMsg").textContent = res.data.length ? "Active lessons are read before the next post." : "No lessons yet.";
+      });
+  }
+  $("lessonForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var text = $("lessonText").value.trim();
+    if (!text || !session) return;
+    $("lessonMsg").textContent = "Saving…";
+    db.from("agent_lessons").insert({ lesson: text, created_by: session.user.email }).then(function (res) {
+      if (res.error) { $("lessonMsg").textContent = "Couldn't save that lesson: " + res.error.message; return; }
+      $("lessonText").value = "";
+      loadLessons();
+    });
+  });
   $("signInForm").addEventListener("submit", function (e) {
     e.preventDefault();
     $("signInMsg").textContent = "Signing in…";

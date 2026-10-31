@@ -3,6 +3,7 @@
 ## What works now
 
 - The public site is live at https://zlee08.github.io/BUS4498_InClass_Builds/ and forwards to the event radar app.
+- Week 10 memory files are now included: the moderator-managed club list, private club history, active lessons, and a GroupMe reader.
 - The website can accept an announcement, submit it to the Supabase Edge Function, and show whether it was published, waiting, rejected, or a duplicate.
 - Published events appear in the event board in date order.
 - The moderator sign-in section can review waiting posts and approve or reject them.
@@ -21,7 +22,11 @@
   - `event_radar/context/posting-rules.md` — posting rules used by the AI
   - `event_radar/context/campus-places.md` — valid campus place references
   - `event_radar/supabase/functions/submit-event/index.ts` — AI agent/Edge Function
+- `event_radar/supabase/functions/read-channel/index.ts` — GroupMe reader; it submits new messages to `submit-event` and remembers processed message IDs
   - `event_radar/supabase/migrations/` — database changes, one SQL file per stage
+- `event_radar/supabase/migrations/20261030000100_club_list.sql` — approved club names and aliases
+- `event_radar/supabase/migrations/20261030000200_club_history.sql` — event history, private agent notes, and processed chat messages
+- `event_radar/supabase/migrations/20261030000300_lessons.sql` — moderator lessons
   - `event_radar/test/sample-announcements.md` — sample posts and expected results
   - `event_radar/AGENTS.md` — build instructions for the assistant
   - `event_radar/HANDOFF.md` — this document
@@ -32,6 +37,8 @@
 - `OPENAI_API_KEY`
 - `SUPABASE_SECRET_KEY`
 - `HOLD_ALL_POSTS`
+- `GROUPME_ACCESS_TOKEN`
+- `GROUPME_GROUP_ID`
 
 Set these in Supabase → Edge Functions → Secrets. Do not paste any secret values into this repo or chat. The public site should only use the project URL and the publishable key.
 
@@ -43,6 +50,9 @@ Try one post at a time from the website or the sample tests.
 - Rule-breaking post (sample D): should go to waiting status for moderator review and not publish as-is.
 - Not-an-event post (sample F): should be rejected as a sale, not an event.
 - Flyer upload (if stage 7 is active): should show the flyer, wait for moderator review, and then publish only after approval.
+- Add a club and alias in Table Editor, then submit a post using the alias: it should publish with the official club name.
+- Submit an update for an earlier event: it should replace the earlier card instead of creating a second card.
+- Add a one-sentence lesson in the Moderator panel, then submit a matching post. Turn the lesson off and confirm it is no longer used.
 
 ## What’s next
 

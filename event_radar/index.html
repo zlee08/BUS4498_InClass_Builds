@@ -56,6 +56,17 @@
         <h3>Waiting for review</h3>
         <p id="waitingStatus" class="muted" role="status"></p>
         <ul id="waitingList" class="board"></ul>
+        <section class="lessons" aria-labelledby="lessonsTitle">
+          <h3 id="lessonsTitle">Agent lessons</h3>
+          <p class="muted">Write one sentence the agent should use on future posts. A public post cannot create a lesson.</p>
+          <form id="lessonForm" class="lesson-form">
+            <label for="lessonText">New lesson</label>
+            <input id="lessonText" type="text" maxlength="300" placeholder="Example: Treat the club nickname ‘Pitch’ as Mustang Pitch Society." required>
+            <button type="submit">Save lesson</button>
+            <p id="lessonMsg" class="muted" role="status"></p>
+          </form>
+          <ul id="lessonList" class="lesson-list"></ul>
+        </section>
       </div>
     </details>
   </section>
